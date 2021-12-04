@@ -15,5 +15,8 @@ internal class DiagnosticsKtTest {
         assertEquals(22, diag.gammaRate)
         assertEquals(9, diag.epsilonRate)
         assertEquals(198, diag.powerConsumption)
+        assertEquals(23, diag.o2GeneratorRating)
+        assertEquals(10, diag.co2ScrubberRating)
+        assertEquals(230, diag.lifeSupportRating)
     }
 }

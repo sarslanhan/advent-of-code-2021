@@ -8,6 +8,7 @@ data class Diagnostics(
     val co2ScrubberRating: Int = 0
 ) {
     val powerConsumption = gammaRate * epsilonRate
+    val lifeSupportRating = o2GeneratorRating * co2ScrubberRating
 }
 
 object DiagnosticsReader {
@@ -25,9 +26,47 @@ object DiagnosticsReader {
         }
         val epsilon = gamma.map { if (it == '0') '1' else '0' }
 
+        val oxGen = (0 until l)
+            .fold(lines) { acc, idx ->
+                if (acc.size == 1) {
+                    acc
+                } else {
+                    val counts = acc.map { it.elementAt(idx) }
+                        .groupingBy { it }.eachCount()
+                    val ones = counts.getOrDefault('1', 0)
+                    val zeros = counts.getOrDefault('0', 0)
+                    if (ones >= zeros) {
+                        acc.filter { it.elementAt(idx) == '1' }
+                    } else {
+                        acc.filter { it.elementAt(idx) == '0' }
+                    }
+                }
+            }
+            .first()
+
+        val co2Scrub = (0 until l)
+            .fold(lines) { acc, idx ->
+                if (acc.size == 1) {
+                    acc
+                } else {
+                    val counts = acc.map { it.elementAt(idx) }
+                        .groupingBy { it }.eachCount()
+                    val ones = counts.getOrDefault('1', 0)
+                    val zeros = counts.getOrDefault('0', 0)
+                    if (ones < zeros) {
+                        acc.filter { it.elementAt(idx) == '1' }
+                    } else {
+                        acc.filter { it.elementAt(idx) == '0' }
+                    }
+                }
+            }
+            .first()
+
         return Diagnostics(
-            gamma.joinToString("").toInt(2),
-            epsilon.joinToString("").toInt(2)
+            gammaRate = gamma.joinToString("").toInt(2),
+            epsilonRate = epsilon.joinToString("").toInt(2),
+            o2GeneratorRating = oxGen.toInt(2),
+            co2ScrubberRating = co2Scrub.toInt(2),
         )
     }
 }
@@ -37,4 +76,5 @@ fun main() {
         .readLines()
     val diag = DiagnosticsReader.read(lines)
     println("Power consumption is ${diag?.powerConsumption ?: "unknown"}")
+    println("Life support rating is ${diag?.lifeSupportRating ?: "unknown"}")
 }
